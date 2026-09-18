@@ -12,17 +12,27 @@ request → Pydantic contract validation → Gemini (untrusted) → guardrails �
 
 ## Endpoints
 
-Both are public, unauthenticated, and are the only HTTP routes the service exposes
-(FastAPI's `/docs`, `/redoc` and `/openapi.json` are disabled).
+Public and unauthenticated endpoints. FastAPI's `/docs`, `/redoc` and `/openapi.json` are disabled for strict challenge compliance.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
+| GET | `/` / `/dashboard` | Interactive Web UI Dashboard (dispatch charts, scenario runner, telemetry) |
 | GET | `/health` | readiness probe, returns `{"status": "ok"}` |
 | POST | `/optimize-energy` | returns the optimized 24-hour schedule |
 
 Malformed requests return a controlled `400` (set `VALIDATION_ERROR_STATUS=422`
 for FastAPI's default). Internal failures return a generic `500` with no
 traceback and no secret.
+
+## Web UI Dashboard
+
+GridWise includes a high-performance web dashboard accessible at `http://localhost:8000/`:
+
+- **Interactive Operator Directives**: Add/edit up to 3 natural language notes with quick preset snippets.
+- **Battery Storage Gauge & Controls**: Real-time visualization of capacity, initial state of charge, and emergency reserves.
+- **Dynamic Energy Visualizations**: 24-hour stacked energy balance dispatch, battery SoC curve, and tariff arbitrage charts.
+- **Hourly Dispatch Schedule**: Complete 24-hour table with action badges (Charge, Discharge, Idle) and 1-click CSV export.
+- **Contract & Verification Inspector**: Live invariant verification (exact energy balance & battery neutrality) and raw JSON viewer.
 
 ## Quickstart
 
@@ -110,12 +120,14 @@ and capacity bounds — before the response is returned, and fails closed.
 
 | File | Role |
 | --- | --- |
-| `main.py` | FastAPI app, both endpoints, error handlers |
+| `main.py` | FastAPI app, endpoints, static file mounting, error handlers |
 | `models.py` | strict request/response contract |
 | `llm_interpreter.py` | Gemini prompt and call |
 | `guardrails.py` | deterministic validation of model output |
 | `optimizer.py` | MILP model, serialization, replay verification |
-| `tests/test_compliance.py` | regression tests |
+| `static/` | Web UI dashboard (HTML, CSS, modern JavaScript) |
+| `tests/test_compliance.py` | regression and judge compliance tests |
+| `tests/test_ui.py` | UI routes and static asset tests |
 
 ## Security
 

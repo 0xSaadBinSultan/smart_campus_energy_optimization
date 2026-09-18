@@ -1,0 +1,199 @@
+/* GridWise UI Stylesheet */
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #0b0f19;
+  color: #f1f5f9;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9);
+}
+
+/* Glassmorphism elements */
+.glass-panel {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel-elevated {
+  background: rgba(23, 32, 54, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+}
+
+.glass-nav {
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Glowing accents */
+.glow-emerald {
+  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.3);
+}
+
+.glow-amber {
+  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.3);
+}
+
+/* Background mesh / grid */
+.bg-grid-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Pulsing indicators */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+/* Status badges */
+.badge-charge {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.badge-discharge {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-idle {
+  background-color: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.badge-applied {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-noop {
+  background-color: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Battery Gauge Styling */
+.battery-gauge-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: #1e293b;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.battery-gauge-reserve {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(239, 68, 68, 0.35);
+  border-right: 2px dashed #f87171;
+  z-index: 1;
+}
+
+.battery-gauge-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, #06b6d4, #10b981);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+/* Transitions */
+.tab-btn {
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+body.light-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+body.light-mode .glass-panel-elevated {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.1);
+}
+body.light-mode .glass-nav {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #e2e8f0;
+}
+body.light-mode .text-slate-400 {
+  color: #64748b !important;
+}
+body.light-mode .text-slate-300 {
+  color: #475569 !important;
+}
+body.light-mode .text-slate-200 {
+  color: #334155 !important;
+}
+body.light-mode .bg-slate-900 {
+  background-color: #f1f5f9 !important;
+}
+body.light-mode .bg-slate-800 {
+  background-color: #e2e8f0 !important;
+}
+body.light-mode .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+body.light-mode .border-slate-800 {
+  border-color: #cbd5e1 !important;
+}
+body.light-mode .border-slate-700 {
+  border-color: #94a3b8 !important;
+}

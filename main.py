@@ -10,10 +10,12 @@ Request flow: Pydantic contract validation -> Gemini interpretation (untrusted)
 """
 
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from guardrails import validate_all
 from llm_interpreter import interpret_notes
@@ -31,6 +33,19 @@ app = FastAPI(
     redoc_url=None,
     openapi_url=None,
 )
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/", response_class=HTMLResponse)
+@app.get("/dashboard", response_class=HTMLResponse)
+def index():
+    index_file = STATIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return HTMLResponse("<h1>GridWise API is Running</h1><p>Visit /health</p>")
 
 
 @app.exception_handler(RequestValidationError)
