@@ -22,7 +22,13 @@ from google.genai import types
 
 load_dotenv()
 
-MODEL_NAME = "gemini-2.5-flash"
+CANDIDATE_MODELS = [
+    "gemini-3.5-flash-lite",
+    os.environ.get("GEMINI_MODEL"),
+    "gemini-3.6-flash",
+    "gemini-2.5-flash",
+]
+CANDIDATE_MODELS = [m for m in CANDIDATE_MODELS if m]
 
 # Keep well inside the 30 s response budget so a slow provider call cannot hold
 # the HTTP request open; on timeout we fall back to all-no_op.
@@ -120,27 +126,29 @@ def interpret_notes(operator_notes: List[str]) -> List[Dict[str, Any]]:
     notes_block = "\n".join(f"{i}: {n}" for i, n in enumerate(operator_notes))
     user_prompt = f"Operator notes:\n{notes_block}\n\nReturn the JSON array now."
 
-    try:
-        response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=user_prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0,
-                max_output_tokens=2000,
-                response_mime_type="application/json",
-                # 2.5 models think by default; 0 disables it for this cheap parsing task.
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
-        )
-        text = (response.text or "").strip()
-        if not text:
-            return []
-        parsed = _extract_json_array(text)
-        if not isinstance(parsed, list):
-            return []
-        return parsed
-    except Exception:
-        # Safe failure: caller/guardrails will default every note to no_op.
-        # Never log or re-raise anything that could contain the API key.
-        return []
+    config = types.GenerateContentConfig(
+        system_instruction=SYSTEM_PROMPT,
+        temperature=0,
+        max_output_tokens=2000,
+        response_mime_type="application/json",
+    )
+
+    for model in CANDIDATE_MODELS:
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=user_prompt,
+                config=config,
+            )
+            text = (response.text or "").strip()
+            if not text:
+                continue
+            parsed = _extract_json_array(text)
+            if isinstance(parsed, list) and len(parsed) > 0:
+                return parsed
+        except Exception:
+            continue
+
+    # Safe failure: caller/guardrails will default every note to no_op.
+    # Never log or re-raise anything that could contain the API key.
+    return []
