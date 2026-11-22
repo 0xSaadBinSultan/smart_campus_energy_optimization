@@ -18,6 +18,8 @@ Two correctness properties the judge replays are enforced here explicitly:
 from typing import Any, Dict, List, Tuple
 
 import pulp
+import os
+import shutil
 
 from models import Battery, HourData, HourlyPlan
 
@@ -129,7 +131,11 @@ def solve_schedule(
     # end-of-day battery neutrality
     prob += energy[23] == battery.initial_energy_kwh
 
-    status = prob.solve(pulp.PULP_CBC_CMD(msg=0))
+    # Homebrew/system CBC supports architectures absent from PuLP's bundled binary.
+    configured = os.environ.get('CBC_PATH')
+    external = configured or shutil.which('cbc')
+    solver = pulp.COIN_CMD(path=external, msg=0) if external else pulp.PULP_CBC_CMD(msg=0)
+    status = prob.solve(solver)
     if pulp.LpStatus[status] != "Optimal":
         raise RuntimeError(
             f"Optimizer failed to find an optimal solution: {pulp.LpStatus[status]}"

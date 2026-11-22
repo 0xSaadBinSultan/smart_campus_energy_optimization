@@ -1,5 +1,7 @@
 # GridWise LLM API — Smart Campus Energy Optimization
 
+[![Build checks](https://github.com/0xSaadBinSultan/smart_campus_energy_optimization/actions/workflows/test.yml/badge.svg)](https://github.com/0xSaadBinSultan/smart_campus_energy_optimization/actions/workflows/test.yml)
+
 BUP CSE Fest 2026 Hackathon submission.
 
 Converts free-text campus operator notes into structured schedule directives with
@@ -34,31 +36,64 @@ GridWise includes a high-performance web dashboard accessible at `http://localho
 - **Hourly Dispatch Schedule**: Complete 24-hour table with action badges (Charge, Discharge, Idle) and 1-click CSV export.
 - **Contract & Verification Inspector**: Live invariant verification (exact energy balance & battery neutrality) and raw JSON viewer.
 
-## Quickstart
+## Platforms and quick start
 
-```bash
-git clone <repo-url>
+The API and browser dashboard run on **Windows, macOS and Linux** with Python
+**3.11 or 3.12**. Any current desktop browser can use the dashboard. Phone and
+tablet browsers can use a server you deliberately expose on your own network;
+there is no native Android/iOS app. The default launcher binds only to localhost.
+
+```sh
+git clone https://github.com/0xSaadBinSultan/smart_campus_energy_optimization.git
 cd smart_campus_energy_optimization
-
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-cp .env.example .env        # then paste your key into .env
-uvicorn main:app --host 0.0.0.0 --port 8000
+python -m venv .venv
 ```
 
-Tested on Python 3.11. The CBC solver ships inside the `pulp` wheel, so no
-separate solver install is required.
+Activate your environment:
 
-## Docker
+| Shell | Command |
+| --- | --- |
+| Windows PowerShell | `.venv\Scripts\Activate.ps1` |
+| Windows Command Prompt | `.venv\Scripts\activate.bat` |
+| macOS/Linux bash or zsh | `source .venv/bin/activate` |
 
-```bash
-docker build -t gridwise .
-docker run --rm -p 8000:8000 -e GEMINI_API_KEY="$GEMINI_API_KEY" gridwise
+Then, on every platform:
+
+```sh
+python -m pip install -r requirements.txt
+python run.py --open-browser
 ```
 
-The container binds `0.0.0.0:8000`. The key is injected at runtime and is never
-baked into the image (`.env` is excluded via `.dockerignore`).
+Use `python3` if needed when creating the environment, or `py -3.12` on Windows.
+Python 3.14 is not supported by these pinned dependency versions. The dashboard
+opens at http://127.0.0.1:8000. You can run the optimizer without a Gemini key;
+operator notes become safe no-ops and the deterministic base schedule still runs.
+To enable note interpretation, copy `.env.example` to `.env` using your editor or
+file manager, and set your own `GEMINI_API_KEY`. Never commit the resulting `.env`.
+
+On Apple Silicon or Linux ARM, install a native CBC solver if the bundled one is
+unavailable: `brew install cbc` on macOS, or `sudo apt install coinor-cbc` on Debian.
+The optimizer prefers `CBC_PATH`, then `cbc` on PATH, then PuLP's bundled binary.
+Windows x64 and Linux x64 can normally use the bundled solver.
+
+## Docker (Windows, macOS and Linux)
+
+With Docker Engine or Docker Desktop and Compose installed:
+
+```sh
+docker compose up --build
+```
+
+Open http://127.0.0.1:8000. Compose optionally reads your `.env` and injects the
+key at runtime. Stop with `docker compose down`. The container includes a native
+CBC package and works independently of the host Python installation. Docker
+availability, architecture and virtualization requirements depend on your OS.
+The image does not bake in API keys or your private `.env`.
+
+For access from another device, `python run.py --host 0.0.0.0` explicitly binds
+all interfaces. The API has no authentication and AI requests can consume your
+provider quota, so use a trusted private network or add authentication/rate limits
+before exposing a hosted instance. No hosted service is configured by this repo.
 
 ## Sample request
 
@@ -78,11 +113,14 @@ has 24 entries whose battery state returns to `initial_energy_kwh` at hour 23.
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
-| `GEMINI_API_KEY` | yes | — | Google AI Studio key |
+| `GEMINI_API_KEY` | for AI notes | — | Google AI Studio key |
 | `GEMINI_TIMEOUT_MS` | no | `8000` | provider call timeout |
 | `VALIDATION_ERROR_STATUS` | no | `400` | status for schema violations |
 
-Model: `gemini-2.5-flash`, temperature 0, thinking disabled, JSON response mode.
+Model: `GEMINI_MODEL` when set, with `gemini-2.5-flash` as the fallback;
+temperature 0, thinking disabled, JSON response mode. Availability depends on your
+Google account and current provider offerings. `CBC_PATH` optionally points to
+a native CBC executable.
 The client is built lazily, so a missing key degrades every note to `no_op`
 rather than taking the process — and `/health` — down at import time.
 
@@ -93,7 +131,9 @@ pip install pytest httpx
 pytest -q
 ```
 
-52 tests. The Gemini call is stubbed, so no key and no network are needed.
+The Gemini call is stubbed, so tests need no key or provider network access.
+GitHub Actions runs Python 3.11/3.12 on Windows x64, Linux x64 and macOS Apple
+Silicon and also builds/checks the Linux container. See Actions for actual results.
 
 ## Design notes
 
@@ -131,6 +171,11 @@ and capacity bounds — before the response is returned, and fails closed.
 
 ## Security
 
-No credential appears anywhere in the source. `.env` is git-ignored and
+Keep credentials outside the source tree. `.env` is git-ignored and
 docker-ignored, the key is read only from the environment, and no error path
 logs or returns it.
+
+## License and contributions
+
+Original project source is [MIT licensed](LICENSE). External packages and the CBC
+solver retain their own licenses. See [CONTRIBUTING.md](CONTRIBUTING.md).

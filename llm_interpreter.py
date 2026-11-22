@@ -22,12 +22,7 @@ from google.genai import types
 
 load_dotenv()
 
-CANDIDATE_MODELS = [
-    "gemini-3.5-flash-lite",
-    os.environ.get("GEMINI_MODEL"),
-    "gemini-3.6-flash",
-    "gemini-2.5-flash",
-]
+CANDIDATE_MODELS = [os.environ.get("GEMINI_MODEL"), "gemini-2.5-flash"]
 CANDIDATE_MODELS = [m for m in CANDIDATE_MODELS if m]
 
 # Keep well inside the 30 s response budget so a slow provider call cannot hold
