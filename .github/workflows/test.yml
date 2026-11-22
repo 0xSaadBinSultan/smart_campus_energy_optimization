@@ -10,14 +10,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-14]
+        os: [ubuntu-22.04, windows-latest, macos-15]
         python: ['3.11', '3.12']
     runs-on: ${{ matrix.os }}
     env:
       GEMINI_API_KEY: ''
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python }}
       - name: Install native CBC on macOS
@@ -28,7 +28,7 @@ jobs:
   container:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - run: docker build -t gridwise-test .
       - name: Validate container health
         shell: bash
